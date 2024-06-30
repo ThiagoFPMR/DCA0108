@@ -1,0 +1,3 @@
+/Users/thiagorodrigues/Workspace/Uni/DCA0108/build/CMakeFiles/MyProject.dir
+/Users/thiagorodrigues/Workspace/Uni/DCA0108/build/CMakeFiles/edit_cache.dir
+/Users/thiagorodrigues/Workspace/Uni/DCA0108/build/CMakeFiles/rebuild_cache.dir
