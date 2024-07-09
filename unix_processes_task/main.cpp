@@ -7,13 +7,20 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 
-int main()
+int main(int argc, char **argv)
 {
     int pid, child, status;
-    // cv::Mat Rx, Ry;
 
-    cv::Mat img = cv::imread("coins.png", cv::IMREAD_GRAYSCALE);
+    if (argc != 3)
+    {
+        std::cerr << "Modo de uso: " << argv[0] << " <input_image> <output_image>" << std::endl;
+        return 1;
+    }
 
+    // Ler imagem fornecida
+    cv::Mat img = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
+
+    // Criando Rx e RY como variáveis compartilhadas entre pai e filhos
     cv::Mat Rx = cv::Mat(img.rows, img.cols, img.type(), mmap(NULL, img.rows * img.cols * img.elemSize(), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
     cv::Mat Ry = cv::Mat(img.rows, img.cols, img.type(), mmap(NULL, img.rows * img.cols * img.elemSize(), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
@@ -45,11 +52,10 @@ int main()
     child = wait(&status);
 
     cv::Mat R = Rx + Ry;
-    cv::min(R, 255, R); // Manter os valores até 255
+    cv::min(R, 255, R); // Limitar os valores até 255
 
-    // Mostrar a imagem final
-    cv::imshow("Filtered Image", R);
-    cv::waitKey(0);
+    // Salvar imagem final
+    cv::imwrite(argv[2], R);
 
     // Liberar memória
     munmap(Rx.data, img.rows * img.cols * img.elemSize());
