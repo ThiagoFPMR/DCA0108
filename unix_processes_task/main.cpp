@@ -11,6 +11,7 @@ int main(int argc, char **argv)
 {
     int pid, child, status;
 
+    // Verificar se os argumentos foram passados corretamente
     if (argc != 3)
     {
         std::cerr << "Modo de uso: " << argv[0] << " <imagem_de_entrada> <imagem_de_saida>" << std::endl;
