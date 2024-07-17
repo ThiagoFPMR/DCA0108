@@ -6,9 +6,9 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 
-void *detectBorderOnXAxis(void *img)
+void *detectBorderOnXAxis(void *ptr)
 {
-    cv::Mat *img = (cv::Mat *)img;
+    cv::Mat *img = (cv::Mat *)ptr;
     cv::Mat *Rx = (cv::Mat *)malloc(sizeof(cv::Mat));
 
     // Definição do operador de Prewitt
@@ -16,14 +16,18 @@ void *detectBorderOnXAxis(void *img)
                   -1, 0, 1,
                   -1, 0, 1);
 
-    cv::filter2D(*img, Rx, -1, Gx);
+    // Detectar bordas na horizontal
+    cv::filter2D(*img, *Rx, -1, Gx);
+
+    // Limitar os valores até 255
+    cv::min(*Rx, 255, *Rx);
 
     return Rx;
 }
 
-void *detectBorderOnYAxis(void *img)
+void *detectBorderOnYAxis(void *ptr)
 {
-    cv::Mat *img = (cv::Mat *)img;
+    cv::Mat *img = (cv::Mat *)ptr;
     cv::Mat *Ry = (cv::Mat *)malloc(sizeof(cv::Mat));
 
     // Definição do operador de Prewitt
@@ -31,7 +35,11 @@ void *detectBorderOnYAxis(void *img)
                   0, 0, 0,
                   1, 1, 1);
 
-    cv::filter2D(*img, Ry, -1, Gy);
+    // Detectar bordas na vertical
+    cv::filter2D(*img, *Ry, -1, Gy);
+
+    // Limitar os valores até 255
+    cv::min(*Ry, 255, *Ry);
 
     return Ry;
 }
@@ -51,12 +59,15 @@ int main(int argc, char **argv)
     // Ler imagem fornecida
     cv::Mat img = cv::imread(argv[1], cv::IMREAD_GRAYSCALE);
 
+    // Detectar bordas em threads separadas
     pthread_create(&xThread, NULL, detectBorderOnXAxis, &img);
     pthread_create(&yThread, NULL, detectBorderOnYAxis, &img);
 
-    pthread_join(xThread, (void *)&Rx);
-    pthread_join(yThread, (void *)&Ry);
+    // Aguardar o término das threads
+    pthread_join(xThread, reinterpret_cast<void **>(&Rx));
+    pthread_join(yThread, reinterpret_cast<void **>(&Ry));
 
+    // Unir as bordas detectadas
     cv::Mat R = *Rx + *Ry;
     cv::min(R, 255, R); // Limitar os valores até 255
 

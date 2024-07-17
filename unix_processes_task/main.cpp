@@ -38,6 +38,7 @@ int main(int argc, char **argv)
     if (pid == 0)
     {
         cv::filter2D(img, Rx, -1, Gx);
+        cv::min(Rx, 255, Rx); // Limitar os valores até 255
         exit(0);
     }
     child = wait(&status);
@@ -47,6 +48,7 @@ int main(int argc, char **argv)
     if (pid == 0)
     {
         cv::filter2D(img, Ry, -1, Gy);
+        cv::min(Ry, 255, Ry); // Limitar os valores até 255
         exit(0);
     }
     child = wait(&status);
