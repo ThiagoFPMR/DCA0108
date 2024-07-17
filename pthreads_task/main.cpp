@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
     if (argc != 3)
     {
-        std::cerr << "Modo de uso: " << argv[0] << " <input_image> <output_image>" << std::endl;
+        std::cerr << "Modo de uso: " << argv[0] << " <imagem_de_entrada> <imagem_de_saida>" << std::endl;
         return 1;
     }
 
