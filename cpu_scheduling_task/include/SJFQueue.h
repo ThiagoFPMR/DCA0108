@@ -26,4 +26,4 @@ private:
     std::list<Process> list; // Linked list to store processes
 };
 
-#endif // SFJOQUEUE_H
+#endif // SFJQUEUE_H

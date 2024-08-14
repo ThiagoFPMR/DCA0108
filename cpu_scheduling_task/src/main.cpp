@@ -5,6 +5,7 @@
 #include "../include/ProcessQueue.h"
 #include "../include/FIFOQueue.h"
 #include "../include/SJFQueue.h"
+#include "../include/RRQueue.h"
 
 void populateQueue(const std::string &filename, ProcessQueue &processQueue)
 {
@@ -28,29 +29,56 @@ void populateQueue(const std::string &filename, ProcessQueue &processQueue)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2)
+    if (argc < 3 || (std::string(argv[1]) == "RR" && argc < 4))
     {
-        std::cerr << "Usage: " << argv[0] << " <filename>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <scheduling_algorihtm> [quantum] <filename>" << std::endl;
         return 1;
     }
     int numProcesses = 0, totalWaitTime = 0;
 
-    FIFOQueue processQueue;
-    populateQueue(argv[1], processQueue);
+    std::string algorithm = argv[1];
+    ProcessQueue *processQueue = nullptr;
+
+    if (algorithm == "FIFO")
+    {
+        processQueue = new FIFOQueue();
+    }
+    else if (algorithm == "SJF")
+    {
+        processQueue = new SJFQueue();
+    }
+    else if (algorithm == "RR")
+    {
+        int quantum = std::stoi(argv[2]);
+        processQueue = new RRQueue(quantum);
+    }
+    else
+    {
+        std::cerr << "Invalid scheduling algorithm: " << algorithm << std::endl;
+        return 1;
+    }
+    std::cout << "Scheduling algorithm: " << algorithm << std::endl;
+
+    populateQueue(argv[argc - 1], *processQueue);
 
     int currentTime = 0;
-    while (!processQueue.isEmpty())
+    while (!processQueue->isEmpty())
     {
-        Process p = processQueue.dequeue();
+        Process p = processQueue->dequeue();
 
-        std::cout << "Process " << p.pid << " waited " << currentTime - p.arrivalTime << " seconds" << std::endl;
+        if (p.pid != -1)
+        {
+            totalWaitTime += currentTime - p.arrivalTime;
+            // std::cout << "Process " << p.pid << " waited " << currentTime - p.arrivalTime << " ms" << std::endl;
+            numProcesses++;
+        }
 
         currentTime += p.burstTime;
-        totalWaitTime += currentTime - p.arrivalTime;
-        numProcesses++;
     }
 
-    std::cout << "Average waiting time: " << totalWaitTime / numProcesses << " seconds" << std::endl;
+    delete processQueue;
+
+    std::cout << "Average waiting time: " << totalWaitTime / numProcesses << " ms" << std::endl;
 
     return 0;
 }
